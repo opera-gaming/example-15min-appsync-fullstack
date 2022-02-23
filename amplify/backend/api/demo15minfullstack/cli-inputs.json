@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "serviceConfiguration": {
+    "apiName": "demo15minfullstack",
+    "serviceName": "AppSync",
+    "gqlSchemaPath": "/home/pony/dev/demo-15min-fullstack/amplify/backend/api/demo15minfullstack/schema.graphql",
+    "defaultAuthType": {
+      "mode": "API_KEY",
+      "expirationTime": 7
+    }
+  }
+}

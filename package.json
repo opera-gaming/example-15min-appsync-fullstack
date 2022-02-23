@@ -11,11 +11,15 @@
     "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11",
     "@types/styled-components": "^5.1.23",
+    "@types/uuid": "^8.3.4",
+    "aws-amplify": "^4.3.14",
+    "aws-amplify-react": "^5.1.9",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
     "styled-components": "^5.3.3",
     "typescript": "^4.5.5",
+    "uuid": "^8.3.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
