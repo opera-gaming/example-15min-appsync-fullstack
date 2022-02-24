@@ -201,3 +201,59 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
    ```
 
    Again, you can reuse UI the components in `src/ui` if you want!
+
+1. Right now, we have to refresh the entire app to see new messages. Even the ones we sent. Let's
+   fix that!
+
+   ```typescript
+   import Observable from "zen-observable-ts";
+   import { onCreateMessage } from "./graphql/subscriptions";
+   import { OnCreateMessageSubscription, CreateMessageMutation } from "./API";
+
+   // In App
+   useEffect(() => {
+     // Subscribe to incoming messages.
+     const subscription = (
+       API.graphql(graphqlOperation(onCreateMessage)) as Observable<{
+         value?: { data?: OnCreateMessageSubscription };
+       }>
+     ).subscribe({
+       // We've received a new message!
+       next: ({ value }) => {
+         console.info("Received: ", value);
+         // Get the message from the event.
+         const message = value?.data?.onCreateMessage;
+         // Just like when we fetch the full list, broken messages can be null.
+         // Let's ignore those
+         if (!message) return;
+         setMessages((msgs) =>
+           // Append the message to the list
+           [...msgs, message]
+             // Only keep 50 messages. The 50 latest specifically
+             .slice(-MAX_MESSAGES)
+         );
+       },
+     });
+
+     // Unsubscribe when the component is unmounted
+     return () => subscription.unsubscribe();
+   }, []);
+   ```
+
+1. Probably, you want to scroll to the bottom of the message list when new
+   messages arrive. This code solves that
+
+   ```typescript
+   useEffect(() => {
+     if (!name) return;
+     if (!messages) return;
+
+     document.documentElement?.scrollIntoView({
+       behavior: "auto",
+       block: "end",
+       inline: "nearest",
+     });
+   }, [messages, name]);
+   ```
+
+And that's it! We're ready to deploy!

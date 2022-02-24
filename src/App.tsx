@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { API } from "aws-amplify";
 import { graphqlOperation, GraphQLResult } from "@aws-amplify/api-graphql";
 
+import Observable from "zen-observable-ts";
+
 import { messagesByDate } from "./graphql/queries";
 import { createMessage } from "./graphql/mutations";
+import { onCreateMessage } from "./graphql/subscriptions";
 
 import { v4 as uuid } from "uuid";
 import Amplify from "aws-amplify";
@@ -12,6 +15,7 @@ import {
   MessagesByDateQuery,
   CreateMessageInput,
   Message,
+  OnCreateMessageSubscription,
   MessagesByDateQueryVariables,
   ModelSortDirection,
   MessageType,
@@ -82,6 +86,17 @@ function App() {
     [name]
   );
 
+  useEffect(() => {
+    if (!name) return;
+    if (!messages) return;
+
+    document.documentElement?.scrollIntoView({
+      behavior: "auto",
+      block: "end",
+      inline: "nearest",
+    });
+  }, [messages, name]);
+
   // Fetch initial
   useEffect(() => {
     (async () => {
@@ -95,6 +110,34 @@ function App() {
         )
       );
     })();
+  }, []);
+
+  useEffect(() => {
+    // Subscribe to incoming messages.
+    const subscription = (
+      API.graphql(graphqlOperation(onCreateMessage)) as Observable<{
+        value?: { data?: OnCreateMessageSubscription };
+      }>
+    ).subscribe({
+      // We've received a new message!
+      next: ({ value }) => {
+        console.info("Received: ", value);
+        // Get the message from the event.
+        const message = value?.data?.onCreateMessage;
+        // Just like when we fetch the full list, broken messages can be null.
+        // Let's ignore those
+        if (!message) return;
+        setMessages((msgs) =>
+          // Append the message to the list
+          [...msgs, message]
+            // Only keep 50 messages. The 50 latest specifically
+            .slice(-MAX_MESSAGES)
+        );
+      },
+    });
+
+    // Unsubscribe when the component is unmounted
+    return () => subscription.unsubscribe();
   }, []);
 
   // Get name if not set
