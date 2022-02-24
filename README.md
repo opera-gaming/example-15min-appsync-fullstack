@@ -27,7 +27,7 @@ guide!
   ```
 - Install amplify + some other tools we'll need
   ```bash
-  yarn add aws-amplify aws-amplify-react uuid
+  yarn add aws-amplify aws-amplify-react uuid @types/uuid
   ```
 - Install amplify CLI
   ```bash
