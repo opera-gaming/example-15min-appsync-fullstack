@@ -114,3 +114,55 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
    ```
 
    Now the app can use the api.
+
+2. Fetching existing message with the following code
+
+   ```typescript
+   const fetchMessagesRequest = async () => {
+     try {
+       const vars: MessagesByDateQueryVariables = {
+         type: MessageType.MESSAGE,
+         // Grab only 50 messages.
+         limit: MAX_MESSAGES,
+         // Sort them so we get the 50 latest message.
+         sortDirection: ModelSortDirection.DESC,
+       };
+       // Do this actual request.
+       const messagesResult = (await API.graphql(
+         graphqlOperation(messagesByDate, vars)
+       )) as GraphQLResult<MessagesByDateQuery>;
+       console.log("fetched messages:", messagesResult.data);
+
+       // Get the messages from the request result. Fallback to empty array.
+       const messages = messagesResult.data?.messagesByDate?.items ?? [];
+       // The messages are now in the reverse order. Let's fix that!
+       messages.reverse();
+
+       return messages;
+     } catch (error) {
+       console.log("fetch messages error:", error);
+     }
+   };
+   ```
+
+   Now we can fetch the messages inside of app
+
+   ```typescript
+   const [messages, setMessages] = useState<Message[]>([]);
+   // Fetch initial messages
+   useEffect(() => {
+     (async () => {
+       const messages = await fetchMessagesRequest();
+       if (!messages) return;
+       setMessages(
+         // Graphql can return null if there is something corrupt about a message.
+         // This can happen if the schema has changed but the database hasn't been migrated.
+         messages.filter(
+           <T extends any>(msg: T | null | undefined): msg is T => !!msg
+         )
+       );
+     })();
+   }, []);
+   ```
+
+   Messages are now in `messages`. It's up to you how you want to render them!
