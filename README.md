@@ -101,3 +101,16 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
 1. Run `amplify mock api` to generate and start a local API server. I chose Typescript for
    programming language and kept everything else as default.
 1. Run `amplify push` to create and deploy your dev server!
+
+# Let's create a web app!
+
+1. In `App.tsx`, add
+
+   ```typescript
+   import Amplify from "aws-amplify";
+   import config from "./aws-exports";
+
+   Amplify.configure(config);
+   ```
+
+   Now the app can use the api.
