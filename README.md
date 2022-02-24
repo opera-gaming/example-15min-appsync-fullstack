@@ -257,3 +257,18 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
    ```
 
 And that's it! We're ready to deploy!
+
+# Deployment
+
+1. If you didn't run `amplify push` before, you'll need to that first. This will deploy the API
+2. Build your project with `yarn build`. This will create a folder `build/` with all the compiled
+   frontend files that we will upload.
+3. Run `amplify console` and choose `AWS console`.
+4. In the browser, go to you app, choose hosting environments and then deploy without a git provider.
+   ![Console1](./docs/console1.png)
+5. Drag and drop your newly created build folder over to the AWS console in your browser.
+   Hit save and deploy.
+6. Now grab the URL under `Domain`, send it to your friends and try it out!
+   ![Console2](./docs/console2.png)
+
+Any time you change you API, do step 1 again. If you change your UI, repeat the steps 2-5!
