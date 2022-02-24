@@ -1,21 +1,26 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API } from "aws-amplify";
 import { graphqlOperation, GraphQLResult } from "@aws-amplify/api-graphql";
 
 import { messagesByDate } from "./graphql/queries";
+import { createMessage } from "./graphql/mutations";
 
 import { v4 as uuid } from "uuid";
 import Amplify from "aws-amplify";
 import config from "./aws-exports";
 import {
   MessagesByDateQuery,
+  CreateMessageInput,
   Message,
   MessagesByDateQueryVariables,
   ModelSortDirection,
   MessageType,
+  CreateMessageMutation,
 } from "./API";
+import WhatsYourName from "./ui/WhatsYourName";
 import MessageView, { MessagesContainer } from "./ui/MessageView";
 import styled from "styled-components";
+import SendMessageView from "./ui/SendMessageView";
 
 Amplify.configure(config);
 
@@ -50,9 +55,34 @@ const fetchMessagesRequest = async () => {
   }
 };
 
+const sendMessageRequest = async (input: CreateMessageInput) => {
+  try {
+    (await API.graphql(
+      graphqlOperation(createMessage, { input })
+    )) as GraphQLResult<CreateMessageMutation>;
+    console.info("Sent message: ", input.message);
+  } catch (error) {
+    console.error("Send message error: ", error);
+  }
+};
+
 function App() {
+  const [name, setName] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  // Fetch initial messages
+
+  const handleSend = useCallback(
+    (message: string) => {
+      sendMessageRequest({
+        type: MessageType.MESSAGE,
+        name,
+        message,
+        clientId: CLIENT_ID,
+      });
+    },
+    [name]
+  );
+
+  // Fetch initial
   useEffect(() => {
     (async () => {
       const messages = await fetchMessagesRequest();
@@ -67,6 +97,11 @@ function App() {
     })();
   }, []);
 
+  // Get name if not set
+  if (!name) {
+    return <WhatsYourName onConfirm={setName} />;
+  }
+
   return (
     <Container>
       <MessagesContainer>
@@ -80,6 +115,7 @@ function App() {
           />
         ))}
       </MessagesContainer>
+      <SendMessageView onSend={handleSend} />
     </Container>
   );
 }

@@ -115,9 +115,19 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
 
    Now the app can use the api.
 
-2. Fetching existing message with the following code
+1. Fetching existing message with the following code
 
    ```typescript
+   import { graphqlOperation, GraphQLResult } from "@aws-amplify/api-graphql";
+   import { messagesByDate } from "./graphql/queries";
+   import {
+     MessagesByDateQuery,
+     Message,
+     MessagesByDateQueryVariables,
+     ModelSortDirection,
+     MessageType,
+   } from "./API";
+
    const fetchMessagesRequest = async () => {
      try {
        const vars: MessagesByDateQueryVariables = {
@@ -148,6 +158,9 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
    Now we can fetch the messages inside of app
 
    ```typescript
+   import { Message } from "./API"; // On top of file
+
+   // Inside of function App
    const [messages, setMessages] = useState<Message[]>([]);
    // Fetch initial messages
    useEffect(() => {
@@ -165,4 +178,26 @@ Nice! You've created your initial backend! You can run `amplify status` to see i
    }, []);
    ```
 
-   Messages are now in `messages`. It's up to you how you want to render them!
+   Messages are now in `messages`. It's up to you how you want to render them! Check out `src/ui`
+   if you want to reuse some prebuilt components.
+
+1. To send new message, we create a similar request:
+
+   ```typescript
+   import { CreateMessageInput, CreateMessageMutation } from "./API";
+
+   import { createMessage } from "./graphql/mutations";
+
+   const sendMessageRequest = async (input: CreateMessageInput) => {
+     try {
+       (await API.graphql(
+         graphqlOperation(createMessage, { input })
+       )) as GraphQLResult<CreateMessageMutation>;
+       console.info("Sent message: ", input.message);
+     } catch (error) {
+       console.error("Send message error: ", error);
+     }
+   };
+   ```
+
+   Again, you can reuse UI the components in `src/ui` if you want!
